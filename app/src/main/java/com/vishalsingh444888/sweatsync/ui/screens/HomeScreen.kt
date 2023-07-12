@@ -18,7 +18,7 @@ fun HomeScreen(viewModel: AppViewModel) {
         }
         is UiState.Success -> {
             val exercises = (uiState as UiState.Success).exercises
-            ExercisesScreen(exercises = exercises)
+            ExerciseDetailsScreen(exercisesItem = exercises[1])
         }
     }
 }

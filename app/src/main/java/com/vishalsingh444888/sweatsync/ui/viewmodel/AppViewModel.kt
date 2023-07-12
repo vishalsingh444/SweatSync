@@ -2,6 +2,8 @@ package com.vishalsingh444888.sweatsync.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vishalsingh444888.sweatsync.data.model.Exercises
+import com.vishalsingh444888.sweatsync.data.model.ExercisesItem
 import com.vishalsingh444888.sweatsync.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,11 +27,12 @@ class AppViewModel @Inject constructor(
             _uiState.value = UiState.Loading
             try{
                 val result = repository.getAllExercise()
-                _uiState.value = UiState.Success(result)
+                _uiState.value = UiState.Success(result,result[0])
             }
             catch(e: Exception){
                 _uiState.value = UiState.Error(e.message)
             }
         }
     }
+
 }
