@@ -4,6 +4,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.vishalsingh444888.sweatsync.navigation.Navigation
 import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
 import com.vishalsingh444888.sweatsync.ui.viewmodel.UiState
 
@@ -17,8 +18,7 @@ fun HomeScreen(viewModel: AppViewModel) {
             Text(text = "Loading...")
         }
         is UiState.Success -> {
-            val exercises = (uiState as UiState.Success).exercises
-            ExerciseDetailsScreen(exercisesItem = exercises[1])
+            Navigation(viewModel = viewModel, uiState = uiState )
         }
     }
 }

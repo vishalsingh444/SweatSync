@@ -18,7 +18,7 @@ class AppViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> get() = _uiState
-
+    var data = Exercises()
     init{
         fetchData()
     }
@@ -27,6 +27,7 @@ class AppViewModel @Inject constructor(
             _uiState.value = UiState.Loading
             try{
                 val result = repository.getAllExercise()
+                data = result
                 _uiState.value = UiState.Success(result,result[0])
             }
             catch(e: Exception){
@@ -34,5 +35,7 @@ class AppViewModel @Inject constructor(
             }
         }
     }
-
+    fun updateCurrentExercise(exercisesItem: ExercisesItem){
+        _uiState.value = UiState.Success(data,exercisesItem)
+    }
 }
