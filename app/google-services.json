@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "746901749565",
+    "project_id": "sweatsync",
+    "storage_bucket": "sweatsync.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:746901749565:android:2231a44bc4ee442c46cf54",
+        "android_client_info": {
+          "package_name": "com.vishalsingh444888.sweatsync"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "746901749565-9g244ddfepchj7rpbglp9soeruhen7fo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vishalsingh444888.sweatsync",
+            "certificate_hash": "af3b134a05c012c7290053cf45054acaf86d8beb"
+          }
+        },
+        {
+          "client_id": "746901749565-mj3vn6m3ktkeq3guksum0qv5pkv10prr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBv_REomP3YunB5jf1MYcc97-0uI_rSGH8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "746901749565-mj3vn6m3ktkeq3guksum0qv5pkv10prr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

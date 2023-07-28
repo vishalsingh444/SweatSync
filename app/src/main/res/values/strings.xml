@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">SweatSync</string>
+    <string name="signIn">Let\'s sign you in.</string>
+    <string name="signIn_greeting">Welcome back.</string>
+    <string name="signIn_message">You\'ve been missed!</string>
 </resources>
