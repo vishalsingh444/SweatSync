@@ -20,12 +20,14 @@ class AuthViewModel: ViewModel() {
     private fun onSignOut(){
         _authenticated.value = false
     }
-    fun signInWithEmailAndPassword(email: String,password: String){
+    fun signInWithEmailAndPassword(email: String,password: String,callBack: (Boolean) -> Unit){
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener{task ->
                 if(task.isSuccessful){
                     onSignInSuccess()
+                    callBack(true)
                 }else{
+                    callBack(false)
                     val exception = task.exception
                     if (exception is FirebaseAuthInvalidCredentialsException) {
                         val errorCode = exception.errorCode
@@ -51,13 +53,14 @@ class AuthViewModel: ViewModel() {
             }
     }
 
-    fun registerWithEmailAndPassword(email: String,password: String){
+    fun registerWithEmailAndPassword(email: String,password: String,callBack: (Boolean) ->Unit){
         auth.createUserWithEmailAndPassword(email,password)
             .addOnCompleteListener { task->
                 if(task.isSuccessful){
                     onSignInSuccess()
+                    callBack(true)
                 }else{
-
+                    callBack(false)
                 }
             }
     }

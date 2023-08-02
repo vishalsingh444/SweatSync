@@ -3,4 +3,9 @@
     <string name="signIn">Let\'s sign you in.</string>
     <string name="signIn_greeting">Welcome back.</string>
     <string name="signIn_message">You\'ve been missed!</string>
+    <string name="register">Let\'s get started! </string>
+    <string name="register_greeting">Welcome to our community.</string>
+    <string name="register_message">Join and explore!</string>
+    <string name="google_register">Register with google</string>
+    <string name="google_signIn">SignIn with google</string>
 </resources>
