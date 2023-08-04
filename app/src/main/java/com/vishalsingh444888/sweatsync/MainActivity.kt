@@ -26,6 +26,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     HomeScreen(viewModel = viewModel)
+
                 }
             }
         }

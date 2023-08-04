@@ -102,12 +102,17 @@ dependencies {
 
     // Dagger Hilt
     implementation "com.google.dagger:hilt-android:2.44"
+    kapt "com.google.dagger:hilt-android-compiler:2.44"
     kapt "com.google.dagger:hilt-compiler:2.44"
+    implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
 
     // Room for Paging 3 Integration
     implementation "androidx.room:room-paging:2.5.2"
 
     //firebase
     implementation("com.google.firebase:firebase-analytics-ktx")
+
+    implementation 'com.google.android.gms:play-services-auth:19.2.0'
+
 
 }

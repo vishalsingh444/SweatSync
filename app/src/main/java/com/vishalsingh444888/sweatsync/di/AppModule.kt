@@ -1,6 +1,9 @@
 package com.vishalsingh444888.sweatsync.di
 
+import com.google.firebase.auth.FirebaseAuth
 import com.vishalsingh444888.sweatsync.data.api.ExerciseApi
+import com.vishalsingh444888.sweatsync.repository.AuthRepository
+import com.vishalsingh444888.sweatsync.repository.AuthRepositoryImpl
 import com.vishalsingh444888.sweatsync.repository.NetworkRepository
 import com.vishalsingh444888.sweatsync.repository.Repository
 import dagger.Module
@@ -43,5 +46,14 @@ object AppModule {
     @Singleton
     fun provideRepository(api: ExerciseApi):Repository{
         return NetworkRepository(api)
+    }
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth() = FirebaseAuth.getInstance()
+
+    @Provides
+    @Singleton
+    fun provideAuthRepositoryImpl(firebaseAuth: FirebaseAuth): AuthRepository{
+        return AuthRepositoryImpl(firebaseAuth)
     }
 }

@@ -2,6 +2,8 @@ package com.vishalsingh444888.sweatsync.ui.auth
 
 import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,8 +21,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,9 +32,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,20 +53,42 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.vishalsingh444888.sweatsync.R
+import kotlinx.coroutines.launch
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(navController: NavController) {
-    val viewModel: AuthViewModel = viewModel()
+fun RegisterScreen(navController: NavController,viewModel: AuthViewModel = hiltViewModel()) {
+
     var emailState by remember { mutableStateOf("") }
     var passwordState by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
     var confirmPasswordState by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
-    var flag = false;
     val context = LocalContext.current
+    val state = viewModel.signUpState.collectAsState(initial = null)
+    val googleSignInState = viewModel.googleSignInState.collectAsState()
+
+
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()){
+            val account = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+            try{
+                val result = account.getResult(ApiException::class.java)
+                val credential = GoogleAuthProvider.getCredential(result.idToken,null)
+                viewModel.googleSignIn(credential = credential)
+
+            }catch (it: ApiException){
+                print(it)
+            }
+
+        }
 
     Box(
         modifier = Modifier
@@ -168,7 +197,17 @@ fun RegisterScreen(navController: NavController) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Text(text = "Or")
             }
-            GoogleCardComp(stringId = R.string.google_register)
+            GoogleCardComp(stringId = R.string.google_register, onClick = {
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .requestProfile()
+                    .requestIdToken(context.getString(R.string.web_client_id))
+                    .build()
+
+                val googleSignInClient = GoogleSignIn.getClient(context,gso)
+
+                launcher.launch(googleSignInClient.signInIntent)
+            })
 
         }
         Column(
@@ -196,15 +235,14 @@ fun RegisterScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    viewModel.registerWithEmailAndPassword(emailState,passwordState){isSuccess ->
-                        if(isSuccess){
-                            navController.navigate("Home")
-                        }
-                        else{
-                            showToast(context, message = "Registration failed. Please try again.")
+                    scope.launch {
+                        if(passwordState==confirmPasswordState){
+                            viewModel.registerUser(emailState,passwordState)
+                        }else{
+                            showToast(context, message = "Incorrect confirm Password.")
                         }
                     }
-                          },
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
@@ -213,21 +251,56 @@ fun RegisterScreen(navController: NavController) {
                         shape = RoundedCornerShape(16.dp)
                     ),
                 shape = RoundedCornerShape(16.dp),
+                enabled = (emailState.isNotEmpty() && passwordState.isNotEmpty() && confirmPasswordState.isNotEmpty()),
+                colors = ButtonDefaults.buttonColors(
+                    disabledContainerColor = MaterialTheme.colorScheme.primary,
+                    disabledContentColor = Color.Black
+                )
 
-                ) {
-                Text(text = "Sign Up", fontSize = 16.sp)
+            ) {
+                if(state.value== null || state.value?.isLoading==false){
+                    Text(text = "Sign Up", fontSize = 16.sp)
+                }
+                else{
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
+                }
             }
         }
-
+    }
+    LaunchedEffect(key1 = state.value?.isSuccess){
+        scope.launch {
+            if(state.value?.isSuccess?.isNotBlank()==true){
+                navController.navigate("Home")
+                val success = state.value?.isSuccess
+                Toast.makeText(context,"$success",Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    LaunchedEffect(key1 = state.value?.isError){
+        scope.launch {
+            if(state.value?.isError?.isNotBlank()==true){
+                val error = state.value?.isError
+                Toast.makeText(context,"$error",Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    LaunchedEffect(key1 = googleSignInState.value.isSuccess){
+        scope.launch {
+            if(googleSignInState.value.isSuccess!=null){
+                navController.navigate("SignOut")
+            }
+        }
     }
 }
 
 
-fun showToast(context:Context,message: String) {
-    Toast.makeText(context,message,Toast.LENGTH_SHORT)
+
+fun showToast(context: Context, message: String) {
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
+
 @Composable
-fun GoogleCardComp(@StringRes stringId: Int) {
+fun GoogleCardComp(@StringRes stringId: Int,onClick:()->Unit) {
     Card(
         colors = CardDefaults.elevatedCardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(8.dp),
@@ -237,10 +310,18 @@ fun GoogleCardComp(@StringRes stringId: Int) {
     ) {
         Row(modifier = Modifier
             .fillMaxSize()
-            .clickable { }, horizontalArrangement = Arrangement.Center , verticalAlignment = Alignment.CenterVertically) {
-            Image(painter = painterResource(id =R.drawable.google_logo ), contentDescription = "register with google",modifier = Modifier.height(30.dp) )
+            .clickable { onClick() },
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.google_logo),
+                contentDescription = "register with google",
+                modifier = Modifier.height(30.dp)
+            )
             Spacer(modifier = Modifier.width(10.dp))
             Text(text = stringResource(id = stringId), color = Color.Black)
         }
     }
 }
+
