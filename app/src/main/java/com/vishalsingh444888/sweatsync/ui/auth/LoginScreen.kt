@@ -2,6 +2,8 @@
 
 package com.vishalsingh444888.sweatsync.ui.auth
 
+import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -50,7 +52,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -62,6 +63,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(navController: NavController,viewModel: AuthViewModel = hiltViewModel()) {
+
     var emailState by remember { mutableStateOf("") }
     var passwordState by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
@@ -224,7 +226,7 @@ fun LoginScreen(navController: NavController,viewModel: AuthViewModel = hiltView
                 )
             )
             {
-                if(state.value==null|| state.value?.isLoading == false || !googleSignInState.value.isLoading){
+                if(state.value==null|| state.value?.isLoading == false){
                     Text(text = "Sign In", fontSize = 16.sp)
                 }
                 else{
@@ -246,7 +248,7 @@ fun LoginScreen(navController: NavController,viewModel: AuthViewModel = hiltView
     LaunchedEffect(key1 = state.value?.isSuccess){
         scope.launch {
             if(state.value?.isSuccess?.isNotBlank()==true){
-                navController.navigate("SignOut")
+                navController.navigate("Home")
                 val success = state.value?.isSuccess
                 Toast.makeText(context,"$success",Toast.LENGTH_LONG).show()
            }
@@ -255,7 +257,8 @@ fun LoginScreen(navController: NavController,viewModel: AuthViewModel = hiltView
     LaunchedEffect(key1 = googleSignInState.value.isSuccess){
         scope.launch {
             if(googleSignInState.value.isSuccess!=null){
-                navController.navigate("SignOut")
+
+                navController.navigate("Home")
             }
         }
     }
@@ -264,11 +267,21 @@ fun LoginScreen(navController: NavController,viewModel: AuthViewModel = hiltView
 @Composable
 fun SignOutScreen(navController: NavController,viewModel: AuthViewModel = hiltViewModel()) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize()) {
-        Button(onClick = {scope.launch { viewModel.signOut() }
-            navController.navigate("Login") }) {
+        Button(onClick = {scope.launch {
+            viewModel.signOut()
+            restartApp(context)
+        }
+            navController.navigate("SignOut") }) {
             Text(text = "Sign Out")
         }
     }
 }
 
+fun restartApp(context: Context){
+    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+    intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
+}

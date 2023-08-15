@@ -1,10 +1,10 @@
 package com.vishalsingh444888.sweatsync.ui.auth
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.AuthCredential
+import com.vishalsingh444888.sweatsync.PreferenceManager
 import com.vishalsingh444888.sweatsync.repository.AuthRepository
 import com.vishalsingh444888.sweatsync.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +17,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repository: AuthRepository
+    private val repository: AuthRepository,
+    private val googleSignInClient: GoogleSignInClient,
+    private val preferenceManager: PreferenceManager
 ): ViewModel() {
 
     private val _signUpState = Channel<AuthState>()
@@ -29,18 +31,20 @@ class AuthViewModel @Inject constructor(
     private val _googleSignInState = MutableStateFlow(GoogleSignInState())
     val googleSignInState: StateFlow<GoogleSignInState> = _googleSignInState
 
-    private val _authenticated = MutableStateFlow(false)
+    private val _authenticated = MutableStateFlow(preferenceManager.isAuthenticated)
     val authenticated : StateFlow<Boolean> = _authenticated
 
     private fun onSignInSuccess(){
-        _authenticated.value = true
+        preferenceManager.isAuthenticated = true
     }
     private fun onSignOut(){
-        _authenticated.value = false
+        preferenceManager.isAuthenticated = false
     }
     fun signOut(){
         viewModelScope.launch {
             repository.signOut()
+            googleSignInClient.signOut()
+            onSignOut()
         }
     }
 
@@ -58,6 +62,7 @@ class AuthViewModel @Inject constructor(
                 }
             }
         }
+        onSignInSuccess()
     }
 
 
@@ -75,8 +80,8 @@ class AuthViewModel @Inject constructor(
                     _signUpState.send(AuthState(isSuccess = "sign Up successful"))
                 }
             }
-
         }
+        onSignInSuccess()
     }
 
     fun loginUser(email: String,password: String) = viewModelScope.launch {
@@ -93,6 +98,7 @@ class AuthViewModel @Inject constructor(
                 }
             }
         }
+        onSignInSuccess()
     }
 
 

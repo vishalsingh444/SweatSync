@@ -287,7 +287,7 @@ fun RegisterScreen(navController: NavController,viewModel: AuthViewModel = hiltV
     LaunchedEffect(key1 = googleSignInState.value.isSuccess){
         scope.launch {
             if(googleSignInState.value.isSuccess!=null){
-                navController.navigate("SignOut")
+                navController.navigate("Home")
             }
         }
     }
