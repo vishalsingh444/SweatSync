@@ -1,13 +1,17 @@
 package com.vishalsingh444888.sweatsync.di
 
+import android.app.Application
 import android.content.Context
+import androidx.room.Room
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.vishalsingh444888.sweatsync.PreferenceManager
 import com.vishalsingh444888.sweatsync.R
 import com.vishalsingh444888.sweatsync.data.api.ExerciseApi
+import com.vishalsingh444888.sweatsync.data.db.AppDatabase
 import com.vishalsingh444888.sweatsync.repository.AuthRepository
 import com.vishalsingh444888.sweatsync.repository.AuthRepositoryImpl
 import com.vishalsingh444888.sweatsync.repository.NetworkRepository
@@ -26,6 +30,17 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+    @Provides
+    @Singleton
+    fun provideAppDatabase(app: Application): AppDatabase {
+        return Room.databaseBuilder(
+            app,
+            AppDatabase::class.java,
+            name = "appDatabase"
+        )
+            .fallbackToDestructiveMigration()
+            .build()
+    }
 
     @Provides
     @Singleton
@@ -51,8 +66,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideRepository(api: ExerciseApi):Repository{
-        return NetworkRepository(api)
+    fun provideRepository(api: ExerciseApi,appDatabase: AppDatabase):Repository{
+        return NetworkRepository(api,appDatabase.appDao())
     }
     @Provides
     @Singleton
@@ -77,5 +92,10 @@ object AppModule {
     @Singleton
     fun provideSharedPreferences(@ApplicationContext context: Context): PreferenceManager{
         return PreferenceManager(context = context)
+    }
+    @Provides
+    @Singleton
+    fun provideFirestroe(): FirebaseFirestore{
+        return FirebaseFirestore.getInstance()
     }
 }

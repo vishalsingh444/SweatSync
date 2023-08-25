@@ -61,10 +61,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
+import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(navController: NavController,viewModel: AuthViewModel = hiltViewModel()) {
+fun RegisterScreen(navController: NavController,viewModel: AuthViewModel = hiltViewModel(),appViewModel: AppViewModel = hiltViewModel()) {
 
     var emailState by remember { mutableStateOf("") }
     var passwordState by remember { mutableStateOf("") }
@@ -74,13 +75,20 @@ fun RegisterScreen(navController: NavController,viewModel: AuthViewModel = hiltV
     val context = LocalContext.current
     val state = viewModel.signUpState.collectAsState(initial = null)
     val googleSignInState = viewModel.googleSignInState.collectAsState()
-
+    var displayName:String? by remember {
+        mutableStateOf("User0001")
+    }
+    var profileUrl: String? by remember {
+        mutableStateOf(null)
+    }
 
     val launcher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()){
             val account = GoogleSignIn.getSignedInAccountFromIntent(it.data)
             try{
                 val result = account.getResult(ApiException::class.java)
+                displayName = result?.displayName
+                profileUrl = result?.photoUrl?.toString()
                 val credential = GoogleAuthProvider.getCredential(result.idToken,null)
                 viewModel.googleSignIn(credential = credential)
 
@@ -287,6 +295,8 @@ fun RegisterScreen(navController: NavController,viewModel: AuthViewModel = hiltV
     LaunchedEffect(key1 = googleSignInState.value.isSuccess){
         scope.launch {
             if(googleSignInState.value.isSuccess!=null){
+                viewModel.updateUserDetailsToFireStore(displayName,profileUrl)
+                appViewModel.updateUserDetails()
                 navController.navigate("Home")
             }
         }

@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.vishalsingh444888.sweatsync.ui.screens.HomeScreen
+import com.vishalsingh444888.sweatsync.ui.screens.SweatSyncApp
 import com.vishalsingh444888.sweatsync.ui.theme.SweatSyncTheme
 import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(viewModel = viewModel)
+                    SweatSyncApp(viewModel = viewModel)
 
                 }
             }

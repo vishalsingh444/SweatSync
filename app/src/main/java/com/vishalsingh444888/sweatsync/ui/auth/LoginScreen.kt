@@ -58,11 +58,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.vishalsingh444888.sweatsync.R
+import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun LoginScreen(navController: NavController,viewModel: AuthViewModel = hiltViewModel()) {
+fun LoginScreen(navController: NavController,viewModel: AuthViewModel = hiltViewModel(),appViewModel: AppViewModel = hiltViewModel()) {
 
     var emailState by remember { mutableStateOf("") }
     var passwordState by remember { mutableStateOf("") }
@@ -72,8 +73,7 @@ fun LoginScreen(navController: NavController,viewModel: AuthViewModel = hiltView
     val state = viewModel.signInState.collectAsState(null)
     val googleSignInState = viewModel.googleSignInState.collectAsState()
 
-
-    val launcher = 
+    val launcher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()){
             val account = GoogleSignIn.getSignedInAccountFromIntent(it.data)
             try{
@@ -257,7 +257,7 @@ fun LoginScreen(navController: NavController,viewModel: AuthViewModel = hiltView
     LaunchedEffect(key1 = googleSignInState.value.isSuccess){
         scope.launch {
             if(googleSignInState.value.isSuccess!=null){
-
+                appViewModel.updateUserDetails()
                 navController.navigate("Home")
             }
         }
@@ -271,8 +271,8 @@ fun SignOutScreen(navController: NavController,viewModel: AuthViewModel = hiltVi
     Column(modifier = Modifier.fillMaxSize()) {
         Button(onClick = {scope.launch {
             viewModel.signOut()
-            restartApp(context)
         }
+            restartApp(context)
             navController.navigate("SignOut") }) {
             Text(text = "Sign Out")
         }

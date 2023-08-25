@@ -7,8 +7,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -20,6 +22,7 @@ import com.vishalsingh444888.sweatsync.ui.auth.RegisterScreen
 import com.vishalsingh444888.sweatsync.ui.screens.ExerciseDetailsScreen
 import com.vishalsingh444888.sweatsync.ui.screens.ExercisesScreen
 import com.vishalsingh444888.sweatsync.ui.screens.HomeScreen
+import com.vishalsingh444888.sweatsync.ui.screens.SweatSyncApp
 import com.vishalsingh444888.sweatsync.ui.screens.ProfileScreen
 import com.vishalsingh444888.sweatsync.ui.screens.WorkoutScreen
 import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
@@ -30,10 +33,11 @@ fun Navigation(viewModel: AppViewModel,uiState: UiState,navController: NavHostCo
 
     NavHost(navController = navController, startDestination = "Home"){
         composable(route = "SignOut"){
-            HomeScreen()
+            SweatSyncApp()
         }
         composable(route = "Home"){
-            ExercisesScreen(uiState = uiState, viewModel = viewModel,navController )
+            HomeScreen()
+//            ExercisesScreen(uiState = uiState, viewModel = viewModel,navController )
         }
         composable(route = "Details"){
             ExerciseDetailsScreen(exercisesItem = (uiState as UiState.Success).currentExercise,navController)
@@ -42,7 +46,7 @@ fun Navigation(viewModel: AppViewModel,uiState: UiState,navController: NavHostCo
             WorkoutScreen()
         }
         composable(route = "Profile"){
-            ProfileScreen()
+            ProfileScreen(viewModel,navController)
         }
     }
 }
@@ -58,7 +62,7 @@ fun AuthNavigation() {
             RegisterScreen(navController = navController)
         }
         composable(route = "Home"){
-            HomeScreen()
+            SweatSyncApp()
         }
     }
 }
@@ -72,7 +76,10 @@ fun BottomNavigationBar(navController: NavController) {
     )
     val backStackEntry by navController.currentBackStackEntryAsState()
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = Color.LightGray,
+        modifier = Modifier,
+        tonalElevation = 0.dp
     ) {
         items.forEach{  item->
             val selected = backStackEntry?.destination?.route
@@ -83,7 +90,7 @@ fun BottomNavigationBar(navController: NavController) {
                     Icon(painter = painterResource(id = item.icon), contentDescription = item.label)
                 },
                 label = {
-                    Text(text = item.label, fontWeight = FontWeight.SemiBold)
+                    Text(text = item.label)
                 }
             )
         }
