@@ -22,6 +22,7 @@ import com.vishalsingh444888.sweatsync.ui.auth.RegisterScreen
 import com.vishalsingh444888.sweatsync.ui.screens.ExerciseDetailsScreen
 import com.vishalsingh444888.sweatsync.ui.screens.ExercisesScreen
 import com.vishalsingh444888.sweatsync.ui.screens.HomeScreen
+import com.vishalsingh444888.sweatsync.ui.screens.NewRoutineScreen
 import com.vishalsingh444888.sweatsync.ui.screens.SweatSyncApp
 import com.vishalsingh444888.sweatsync.ui.screens.ProfileScreen
 import com.vishalsingh444888.sweatsync.ui.screens.WorkoutScreen
@@ -36,8 +37,10 @@ fun Navigation(viewModel: AppViewModel,uiState: UiState,navController: NavHostCo
             SweatSyncApp()
         }
         composable(route = "Home"){
-            HomeScreen()
-//            ExercisesScreen(uiState = uiState, viewModel = viewModel,navController )
+            HomeScreen(viewModel,navController)
+        }
+        composable(route = "ExerciseList"){
+            ExercisesScreen(uiState = uiState, viewModel = viewModel,navController )
         }
         composable(route = "Details"){
             ExerciseDetailsScreen(exercisesItem = (uiState as UiState.Success).currentExercise,navController)
@@ -47,6 +50,9 @@ fun Navigation(viewModel: AppViewModel,uiState: UiState,navController: NavHostCo
         }
         composable(route = "Profile"){
             ProfileScreen(viewModel,navController)
+        }
+        composable(route = "CreateNewRoutine"){
+            NewRoutineScreen(viewModel = viewModel,navController)
         }
     }
 }

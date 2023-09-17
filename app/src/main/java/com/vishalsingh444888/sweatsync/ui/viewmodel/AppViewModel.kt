@@ -1,6 +1,8 @@
 package com.vishalsingh444888.sweatsync.ui.viewmodel
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -12,7 +14,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,6 +28,9 @@ class AppViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> get() = _uiState
     var data = Exercises()
+
+    val exerciseIds =  MutableStateFlow(mutableListOf<String>())
+
     init{
         viewModelScope.launch {
             storeDataInDatabase()
@@ -75,8 +79,39 @@ class AppViewModel @Inject constructor(
             }
         }
     }
+    fun addRoutineToFireStore(routineName: String, title: String, exerciseIds: List<String>){
+        viewModelScope.launch {
+            val userCollection = firestore.collection("users")
+            val uid = firebaseAuth.currentUser?.uid
+            val routineData = mutableMapOf(
+                "routineName" to routineName,
+                "title" to title,
+                "exerciseIds" to exerciseIds
+            )
+            userCollection.document(uid?: "")
+                .update("routines",routineData)
+                .addOnSuccessListener {
+                    Log.d("firestore", "Routine data added to the user document.")
+                }
+                .addOnFailureListener{ e->
+                    Log.d("firestore", "Error adding routine data to the user document: $e")
+                }
+        }
+    }
     private fun setUsernameAndProfilePicture(name: String?,profilePicture: String?){
         _profileUiState.value = ProfileUiState(name,profilePicture)
         Log.d("firebase","username and profile picture is stored successfully ${profileUiState.value.username} ${profileUiState.value.profileUrl}")
+    }
+    fun clearCurrentExerciseIds(){
+        exerciseIds.value.clear()
+    }
+
+    fun addExerciseIdToList(id : String){
+        exerciseIds.value.add(id)
+        exerciseIds.value = exerciseIds.value.toMutableList()
+    }
+    fun removeExerciseIdFromList(id: String){
+        exerciseIds.value.remove(id)
+        exerciseIds.value = exerciseIds.value.toMutableList()
     }
 }

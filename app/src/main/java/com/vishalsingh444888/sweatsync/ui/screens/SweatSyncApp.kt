@@ -6,7 +6,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.vishalsingh444888.sweatsync.navigation.AuthNavigation
 import com.vishalsingh444888.sweatsync.navigation.BottomNavigationBar
@@ -21,10 +25,19 @@ fun SweatSyncApp(viewModel: AppViewModel = hiltViewModel(), authViewModel: AuthV
     val uiState by viewModel.uiState.collectAsState()
     val navController = rememberNavController()
     val authenticated by authViewModel.authenticated.collectAsState()
+    var showBottomBar by rememberSaveable { mutableStateOf(true) }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    showBottomBar = when(navBackStackEntry?.destination?.route){
+        "CreateNewRoutine" -> false
+        "ExerciseList" -> false
+        "Details" -> false
+        else -> true
+    }
     if(authenticated){
         Scaffold (
             bottomBar = {
-                BottomNavigationBar(navController = navController)
+                if(showBottomBar) BottomNavigationBar(navController = navController)
             }
         ){
             Navigation(viewModel = viewModel, uiState = uiState,navController = navController)

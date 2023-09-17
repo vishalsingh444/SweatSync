@@ -8,5 +8,6 @@
     <string name="register_message">Join and explore!</string>
     <string name="google_register">Register with google</string>
     <string name="google_signIn">SignIn with google</string>
-    <string name="web_client_id">746901749565-54sm7nb2a7brjll5geg6jaaodpmkqvp2.apps.googleusercontent.com</string>
+    <string name="web_client_id">746901749565-54sm7nb2a7brjll5geg6jaaodpmkqvp2.apps.googleusercontent.com</string>\
+    <string name="new_routine_message">Get started by adding an exercise to your routine</string>
 </resources>

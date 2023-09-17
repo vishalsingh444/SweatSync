@@ -31,15 +31,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.vishalsingh444888.sweatsync.R
+import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(viewModel: AppViewModel, navController: NavController) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "Routine", fontWeight = FontWeight.SemiBold) },
+                title = {
+                    Text(
+                        text = "Routines",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 18.sp
+                    )
+                },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(MaterialTheme.colorScheme.surface),
                 modifier = Modifier.heightIn(max = 50.dp)
             )
@@ -57,9 +65,14 @@ fun HomeScreen() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
-                    onClick = {},
+                    onClick = {
+                        navController.navigate("CreateNewRoutine")
+                        viewModel.clearCurrentExerciseIds()
+                    },
                     shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.weight(1f).height(50.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
                     colors = ButtonDefaults.buttonColors(
                         MaterialTheme.colorScheme.surface,
                         contentColor = Color.White
@@ -77,9 +90,12 @@ fun HomeScreen() {
                     }
                 }
                 Spacer(Modifier.width(16.dp))
-                Button(onClick = {},
+                Button(
+                    onClick = {},
                     shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.weight(1f).height(50.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
                     colors = ButtonDefaults.buttonColors(
                         MaterialTheme.colorScheme.surface,
                         contentColor = Color.White

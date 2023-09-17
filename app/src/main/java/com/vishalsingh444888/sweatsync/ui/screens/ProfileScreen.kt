@@ -49,7 +49,7 @@ fun ProfileScreen(appViewModel: AppViewModel, navController: NavController) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "Profile", fontWeight = FontWeight.SemiBold) },
+                title = { Text(text = "Profile", fontWeight = FontWeight.SemiBold, fontSize = 18.sp) },
                 modifier = Modifier.heightIn(max = 50.dp),
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(MaterialTheme.colorScheme.surface)
             )
