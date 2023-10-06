@@ -13,4 +13,7 @@ interface AppDao {
 
     @Query("SELECT * FROM appDatabase")
     suspend fun getAllExercises(): List<ExercisesItem>
+
+    @Query("SELECT * FROM appDatabase WHERE ID = :id")
+    suspend fun getExerciseById(id : String): ExercisesItem
 }

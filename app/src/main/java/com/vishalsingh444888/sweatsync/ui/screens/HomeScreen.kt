@@ -11,10 +11,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +27,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,10 +41,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.vishalsingh444888.sweatsync.R
 import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
+import com.vishalsingh444888.sweatsync.ui.viewmodel.RoutineData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(viewModel: AppViewModel, navController: NavController) {
+    viewModel.updateUserRoutineFromFireStore()
+    val routines by viewModel.firebaseRoutine.collectAsState()
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -68,6 +78,7 @@ fun HomeScreen(viewModel: AppViewModel, navController: NavController) {
                     onClick = {
                         navController.navigate("CreateNewRoutine")
                         viewModel.clearCurrentExerciseIds()
+                        viewModel.clearRoutineExercises()
                     },
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
@@ -113,6 +124,52 @@ fun HomeScreen(viewModel: AppViewModel, navController: NavController) {
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "My Routines", fontSize = 20.sp)
+                Spacer(modifier = Modifier.width(16.dp))
+                Divider(thickness = 2.dp)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            RoutinesLazyList(routines = routines)
+        }
+    }
+}
+
+
+@Composable
+fun RoutineCardComponent(routine: RoutineData) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
+    ) {
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)) {
+            Text(text = routine.routineName, fontSize = 20.sp, color = MaterialTheme.colorScheme.primary )
+            Text(text = "${routine.routine.size} Exercises", fontSize = 16.sp, fontWeight = FontWeight.Light,color = Color.LightGray)
+            Button(onClick = { /*TODO*/ },modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
+                Text(text = "Start", fontSize = 16.sp)
+            }
+        }
+    }
+}
+
+@Composable
+fun RoutinesLazyList(routines : List<RoutineData>) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth().padding(bottom = 60.dp )
+    ){
+        items(routines){routine ->
+            RoutineCardComponent(routine = routine)
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.vishalsingh444888.sweatsync.ui.components
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -93,7 +95,7 @@ fun ExerciseListComponent(
                 text = exercise.name,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Normal,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
@@ -107,9 +109,11 @@ fun ExerciseListComponent(
             iconState = !iconState
             if (iconState) {
                 viewModel.addExerciseIdToList(exercise.id)
+
             } else {
                 viewModel.removeExerciseIdFromList(exercise.id)
             }
+
         }) {
             Icon(
                 painter = if (exerciseIds.contains(exercise.id)) {
@@ -175,7 +179,8 @@ fun SearchExercise() {
 
 @Composable
 fun ExercisesList(viewModel: AppViewModel, exercises: Exercises, navController: NavController) {
-
+    val exerciseIdsList by viewModel.exerciseIds.collectAsState()
+    val context = LocalContext.current
     Box(modifier = Modifier.fillMaxSize()) {
         val exerciseIdsList by viewModel.exerciseIds.collectAsState()
         Column(
@@ -196,21 +201,25 @@ fun ExercisesList(viewModel: AppViewModel, exercises: Exercises, navController: 
             }
 
         }
-        if(exerciseIdsList.size>0) {
-            FloatingActionButton(
-                onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .align(
-                        Alignment.BottomCenter
-                    )
-                    .heightIn(max = 40.dp),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                Text(text = "add Exercises")
-            }
+        Button(
+            onClick = {
+                      if(exerciseIdsList.size>0){
+                          viewModel.addExercisesToRoutineExercises()
+                          navController.navigate("CreateNewRoutine")
+                      }else{
+                          Toast.makeText(context," Select atleast 1 exercise",Toast.LENGTH_SHORT).show()
+                      }
+                navController.popBackStack("ExerciseList", inclusive = true)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .align(
+                    Alignment.BottomCenter
+                )
+                .heightIn(max = 40.dp),
+        ) {
+            Text(text = "add Exercises")
         }
     }
 

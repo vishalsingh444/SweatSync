@@ -11,6 +11,8 @@ interface Repository {
     suspend fun insertExerciseInDb(exercisesItem: ExercisesItem)
 
     suspend fun getAllExerciseFromDb(): List<ExercisesItem>
+
+    suspend fun getExerciseById(id: String): ExercisesItem
 }
 
 class NetworkRepository(
@@ -21,6 +23,10 @@ class NetworkRepository(
         return api.getAllExercises()
     }
 
+    override suspend fun getExerciseById(id: String): ExercisesItem {
+        return dao.getExerciseById(id = id)
+    }
+
     override suspend fun insertExerciseInDb(exercisesItem: ExercisesItem) {
         return dao.insertExercises(exercisesItem)
     }
@@ -28,4 +34,6 @@ class NetworkRepository(
     override suspend fun getAllExerciseFromDb(): List<ExercisesItem> {
         return dao.getAllExercises()
     }
+
+
 }
