@@ -1,6 +1,8 @@
 package com.vishalsingh444888.sweatsync.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -31,9 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,11 +43,14 @@ import com.vishalsingh444888.sweatsync.R
 import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
 import com.vishalsingh444888.sweatsync.ui.viewmodel.RoutineData
 
+@RequiresApi(Build.VERSION_CODES.S)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(viewModel: AppViewModel, navController: NavController) {
     viewModel.updateUserRoutineFromFireStore()
     val routines by viewModel.firebaseRoutine.collectAsState()
+    val isStartRoutineListUpdated by viewModel.isStartRoutineListUpdated
+    Log.d("appviewmodel","isStartRoutineListUpdated is $isStartRoutineListUpdated")
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -136,40 +139,70 @@ fun HomeScreen(viewModel: AppViewModel, navController: NavController) {
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            RoutinesLazyList(routines = routines)
+            RoutinesLazyList(routines = routines,viewModel,navController)
         }
     }
 }
 
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun RoutineCardComponent(routine: RoutineData) {
+fun RoutineCardComponent(
+    routine: RoutineData,
+    viewModel: AppViewModel,
+    navController: NavController
+) {
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)) {
-            Text(text = routine.routineName, fontSize = 20.sp, color = MaterialTheme.colorScheme.primary )
-            Text(text = "${routine.routine.size} Exercises", fontSize = 16.sp, fontWeight = FontWeight.Light,color = Color.LightGray)
-            Button(onClick = { /*TODO*/ },modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = routine.routineName,
+                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "${routine.routine.size} Exercises",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Light,
+                color = Color.LightGray
+            )
+            Button(onClick = {
+                viewModel.resetStartRoutineList()
+                viewModel.updateStartRoutineList(routine.routineName)
+                viewModel.updateStartRoutine(routine)
+                viewModel.clearCheckboxState()
+                viewModel.startTimer()
+                navController.navigate("StartRoutine")
+            }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
                 Text(text = "Start", fontSize = 16.sp)
             }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun RoutinesLazyList(routines : List<RoutineData>) {
+fun RoutinesLazyList(
+    routines: List<RoutineData>,
+    viewModel: AppViewModel,
+    navController: NavController
+) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxWidth().padding(bottom = 60.dp )
-    ){
-        items(routines){routine ->
-            RoutineCardComponent(routine = routine)
+            .fillMaxWidth()
+            .padding(bottom = 60.dp)
+    ) {
+        items(routines) { routine ->
+            RoutineCardComponent(routine = routine,viewModel,navController)
         }
     }
 }

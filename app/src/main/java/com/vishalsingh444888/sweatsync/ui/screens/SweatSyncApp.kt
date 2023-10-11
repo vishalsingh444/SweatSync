@@ -1,6 +1,8 @@
 package com.vishalsingh444888.sweatsync.ui.screens
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -18,6 +20,7 @@ import com.vishalsingh444888.sweatsync.navigation.Navigation
 import com.vishalsingh444888.sweatsync.ui.auth.AuthViewModel
 import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +35,7 @@ fun SweatSyncApp(viewModel: AppViewModel = hiltViewModel(), authViewModel: AuthV
         "CreateNewRoutine" -> false
         "ExerciseList" -> false
         "Details" -> false
+        "StartRoutine" -> false
         else -> true
     }
     if(authenticated){

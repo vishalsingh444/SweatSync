@@ -1,6 +1,12 @@
 package com.vishalsingh444888.sweatsync.ui.viewmodel
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -15,7 +21,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.Duration
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Timer
 import javax.inject.Inject
+import kotlin.concurrent.fixedRateTimer
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
@@ -41,11 +52,87 @@ class AppViewModel @Inject constructor(
 
     private val _firebaseRoutine = MutableStateFlow(listOf<RoutineData>())
     val firebaseRoutine = _firebaseRoutine.asStateFlow()
+
+    private val _startRoutineList = MutableStateFlow(mutableListOf<ExercisesItem>())
+    val startRoutineList = _startRoutineList.asStateFlow()
+
+    val startRoutine = MutableStateFlow(RoutineData(routineName = "",routine = listOf()))
+
+    private val _isStartRoutineListUpdated = mutableStateOf(false)
+    val isStartRoutineListUpdated = _isStartRoutineListUpdated
+
+    private val checkboxState = mutableStateListOf<ExerciseCheckboxState>()
+
+    private val _startRoutineState = MutableStateFlow(StartRoutineState())
+    val startRoutineState = _startRoutineState.asStateFlow()
+
+    private val _workoutList = MutableStateFlow<List<Workout>>(listOf())
+    val workoutList = _workoutList.asStateFlow()
+    //timer variables
+    @RequiresApi(Build.VERSION_CODES.O)
+    private var time: Duration = Duration.ZERO
+    private lateinit var timer: Timer
+
+    var seconds by mutableStateOf("00")
+    var minutes by mutableStateOf("00")
+    var hours by mutableStateOf("00")
+    var isPlaying by mutableStateOf(false)
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    val currentDate = LocalDate.now()
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    val formatter = DateTimeFormatter.ofPattern("dd-MM-yy")
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    val formateDate = currentDate.format(formatter)
+
     init{
         viewModelScope.launch {
             storeDataInDatabase()
         }
         _routineExercises.value.clear()
+    }
+
+    fun updateStartRoutineState(exercises: String, sets: String){
+        var _exercise = _startRoutineState.value.exercises.toInt() + exercises.toInt()
+        var _set = _startRoutineState.value.sets.toInt() + sets.toInt()
+
+        _startRoutineState.value = _startRoutineState.value.copy(
+            exercises = _exercise.toString(),
+            sets = _set.toString()
+        )
+    }
+    fun resetStartRoutineState(){
+        _startRoutineState.value = _startRoutineState.value.copy(duration = "0:0:0", exercises = "0", sets = "0")
+    }
+    fun updateDurationInStartRoutineState(duration: String){
+        _startRoutineState.value = _startRoutineState.value.copy(
+            duration = duration
+        )
+        Log.d("timer", "in _startRoutineState the duration in ${_startRoutineState.value.duration}")
+    }
+    // to check the checkbox state for lazyColumn in start routine screen
+    fun getCheckboxState(exerciseId:String):Boolean{
+        val state = checkboxState.find { it.exerciseId == exerciseId }
+        return state?.isChecked?:false
+    }
+    fun clearCheckboxState(){
+        checkboxState.clear()
+    }
+    fun setCheckboxState(exerciseId: String,isChecked: Boolean){
+        val index = checkboxState.indexOfFirst{ it.exerciseId == exerciseId }
+        if(index!=-1){
+            checkboxState[index] = checkboxState[index].copy(isChecked = isChecked)
+        }
+        else{
+            checkboxState.add(ExerciseCheckboxState(exerciseId = exerciseId,isChecked = isChecked))
+        }
+    }
+
+    fun updateStartRoutine(routine: RoutineData){
+        startRoutine.value = routine
+        Log.d("appviewmodel","startRoutine is ${startRoutine.value.routineName}")
     }
     fun fetchData(){
         viewModelScope.launch {
@@ -159,6 +246,37 @@ class AppViewModel @Inject constructor(
         }
         updateUserRoutineFromFireStore()
     }
+    //update workout to firestore
+    fun updateWorkoutToFireStore(routineName:String,duration: String, exercises: String, sets: String,date: String){
+        val workout = Workout(routineName,duration,exercises,sets,date)
+        viewModelScope.launch {
+            val uid = firebaseAuth.currentUser?.uid
+            val userDocument = firestore.collection("users").document(uid?:"")
+
+            userDocument.update("workouts",FieldValue.arrayUnion(workout))
+                .addOnSuccessListener {
+                    Log.d("firebase","workout successfully added")
+                    getWorkoutListFromFireStore()
+                }
+                .addOnFailureListener { e ->
+                    Log.d("firebase","error: $e")
+                }
+        }
+    }
+
+    //fetching workout data from firestoree
+    fun getWorkoutListFromFireStore(){
+        val uid = firebaseAuth.currentUser?.uid
+        val userDocument = firestore.collection("users").document(uid?:"")
+        userDocument.get().addOnSuccessListener { dataSnapshot ->
+            if(dataSnapshot.exists()){
+                _workoutList.value = dataSnapshot.get("workouts") as List<Workout>
+            }
+        }
+            .addOnFailureListener {
+                Log.d("firebase","failed to fetch workout list from firestore")
+            }
+    }
     private fun setUsernameAndProfilePicture(name: String?,profilePicture: String?){
         _profileUiState.value = ProfileUiState(name,profilePicture)
         Log.d("firebase","username and profile picture is stored successfully ${profileUiState.value.username} ${profileUiState.value.profileUrl}")
@@ -166,6 +284,7 @@ class AppViewModel @Inject constructor(
     fun clearCurrentExerciseIds(){
         exerciseIds.value.clear()
     }
+
 
     fun addExerciseIdToList(id : String){
         if(!exerciseIds.value.contains(id)){
@@ -214,6 +333,62 @@ class AppViewModel @Inject constructor(
 
     fun updateRoutineTitle(name: String){
         _routineTitle.value = name
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    fun startTimer(){
+        timer = fixedRateTimer(initialDelay = 1000L, period = 1000L){
+            time = time.plus(Duration.ofSeconds(1L))
+            updateTimeState()
+        }
+        isPlaying = true
+        Log.d("timer","timer started")
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun updateTimeState(){
+        this.seconds = time.toSecondsPart().toString()
+        this.minutes = time.toMinutesPart().toString()
+        this.hours = time.toHoursPart().toString()
+        val duration = "$hours:$minutes:$seconds"
+        Log.d("timer","current duration = $duration")
+        updateDurationInStartRoutineState(duration = duration)
+
+    }
+
+    fun pauseTimer(){
+        timer.cancel()
+        isPlaying = false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    fun restartTimer(){
+        pauseTimer()
+        time = Duration.ZERO
+        updateTimeState()
+    }
+
+    fun updateStartRoutineList(routineName: String){
+        _isStartRoutineListUpdated.value = false
+        val startRoutine = _firebaseRoutine.value.find { it.routineName == routineName }
+        if(startRoutine!=null){
+            viewModelScope.launch {
+                startRoutine.routine.forEach{
+                    _startRoutineList.value.add(repository.getExerciseById(it.id))
+                    Log.d("appviewmodel","_startRoutineList size = ${_startRoutineList.value.size}")
+                }
+                _isStartRoutineListUpdated.value = true
+            }
+
+        }
+    }
+
+
+    fun resetStartRoutineList(){
+        _startRoutineList.value.clear()
+        Log.d("appviewmodel","_startroutinList size = ${_startRoutineList.value.size}")
     }
 
 }
