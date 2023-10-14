@@ -264,20 +264,7 @@ fun LoginScreen(navController: NavController,viewModel: AuthViewModel = hiltView
     }
 }
 
-@Composable
-fun SignOutScreen(navController: NavController,viewModel: AuthViewModel = hiltViewModel()) {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    Column(modifier = Modifier.fillMaxSize()) {
-        Button(onClick = {scope.launch {
-            viewModel.signOut()
-        }
-            restartApp(context)
-            navController.navigate("SignOut") }) {
-            Text(text = "Sign Out")
-        }
-    }
-}
+
 
 fun restartApp(context: Context){
     val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)

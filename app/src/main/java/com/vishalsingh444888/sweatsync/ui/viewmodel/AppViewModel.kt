@@ -68,6 +68,16 @@ class AppViewModel @Inject constructor(
 
     private val _workoutList = MutableStateFlow<List<Workout>>(listOf())
     val workoutList = _workoutList.asStateFlow()
+
+    private val _totalWorkouts = MutableStateFlow<String>("")
+    val totalWorkouts = _totalWorkouts.asStateFlow()
+
+    private val _totalExercises = MutableStateFlow("")
+    val totalExercises = _totalExercises.asStateFlow()
+
+    private val _totalSets = MutableStateFlow("")
+    val totalSets = _totalSets.asStateFlow()
+
     //timer variables
     @RequiresApi(Build.VERSION_CODES.O)
     private var time: Duration = Duration.ZERO
@@ -92,11 +102,12 @@ class AppViewModel @Inject constructor(
             storeDataInDatabase()
         }
         _routineExercises.value.clear()
+
     }
 
     fun updateStartRoutineState(exercises: String, sets: String){
-        var _exercise = _startRoutineState.value.exercises.toInt() + exercises.toInt()
-        var _set = _startRoutineState.value.sets.toInt() + sets.toInt()
+        val _exercise = _startRoutineState.value.exercises.toInt() + exercises.toInt()
+        val _set = _startRoutineState.value.sets.toInt() + sets.toInt()
 
         _startRoutineState.value = _startRoutineState.value.copy(
             exercises = _exercise.toString(),
@@ -234,15 +245,20 @@ class AppViewModel @Inject constructor(
     fun addRoutineToFireStore(routineName: String){
         val routineData = RoutineData(routineName = routineName,routine.value)
         viewModelScope.launch {
-            val uid = firebaseAuth.currentUser?.uid
-            val routineDocument = firestore.collection("users").document(uid?: "").collection("routines").document()
-            routineDocument.set(routineData)
-                .addOnSuccessListener {
-                    Log.d("firestore", "Routine data added to Firestore.")
-                }
-                .addOnFailureListener { e ->
-                    Log.d("firestore", "Error adding routine data to Firestore: $e")
-                }
+            try {
+                val uid = firebaseAuth.currentUser?.uid
+                val routineDocument = firestore.collection("users").document(uid?: "").collection("routines").document()
+                routineDocument.set(routineData)
+                    .addOnSuccessListener {
+                        Log.d("firestore", "Routine data added to Firestore.")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.d("firestore", "Error adding routine data to Firestore: $e")
+                    }
+            }catch (e:Exception){
+                Log.e("firebase","$e")
+            }
+
         }
         updateUserRoutineFromFireStore()
     }
@@ -270,7 +286,27 @@ class AppViewModel @Inject constructor(
         val userDocument = firestore.collection("users").document(uid?:"")
         userDocument.get().addOnSuccessListener { dataSnapshot ->
             if(dataSnapshot.exists()){
-                _workoutList.value = dataSnapshot.get("workouts") as List<Workout>
+                val workouts = mutableListOf<Workout>()
+
+                val workoutsData = dataSnapshot.get("workouts") as List<HashMap<String,Any>>?
+                var t_exercise = 0
+                var t_sets = 0
+                workoutsData?.forEach { workoutData ->
+                    val routineName = workoutData["routineName"] as String
+                    val duration = workoutData["duration"] as String
+                    val exercises = workoutData["exercises"] as String
+                    val sets = workoutData["sets"] as String
+                    val date = workoutData["date"] as String
+                    t_exercise += exercises.toInt()
+                    t_sets += sets.toInt()
+                    val workout = Workout(routineName,duration,exercises,sets,date)
+                    workouts.add(workout)
+                }
+                _workoutList.value = workouts
+                _totalWorkouts.value = _workoutList.value.size.toString()
+                _totalExercises.value = t_exercise.toString()
+                _totalSets.value = t_sets.toString()
+                
             }
         }
             .addOnFailureListener {

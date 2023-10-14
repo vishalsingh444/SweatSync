@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import com.vishalsingh444888.sweatsync.ui.auth.SignOutScreen
 import com.vishalsingh444888.sweatsync.ui.components.ExercisesList
 import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
 import com.vishalsingh444888.sweatsync.ui.viewmodel.UiState
