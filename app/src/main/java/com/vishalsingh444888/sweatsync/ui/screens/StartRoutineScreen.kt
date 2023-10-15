@@ -62,6 +62,7 @@ fun StartRoutineScreen(viewModel: AppViewModel, navController: NavController) {
     }
     BackHandler {
         viewModel.restartTimer()
+        viewModel.pauseTimer()
         viewModel.resetStartRoutineState()
         navController.navigate("Home")
     }
@@ -127,6 +128,7 @@ fun TopRowComponent(
     value: String,
     fontWeight: FontWeight = FontWeight.Normal,
     color: Color = MaterialTheme.colorScheme.onBackground,
+    valueColor : Color = Color.Gray,
     onClick: () -> Unit = {}
 
 ) {
@@ -135,7 +137,7 @@ fun TopRowComponent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = heading, fontSize = 12.sp, fontWeight = fontWeight, color = color)
-        Text(text = value, fontSize = 12.sp, fontWeight = fontWeight, color = color)
+        Text(text = value, fontSize = 12.sp, fontWeight = fontWeight, color = valueColor)
     }
 }
 

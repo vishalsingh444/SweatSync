@@ -64,7 +64,7 @@ fun ProfileScreen(
     if (profileUiState.username == "User001") {
         appViewModel.updateUserDetails()
     }
-    if(workouts.isEmpty()){
+    if (workouts.isEmpty()) {
         appViewModel.getWorkoutListFromFireStore()
     }
     Log.d("firebase", "name: ${profileUiState.username} ${profileUiState.profileUrl}")
@@ -139,7 +139,13 @@ fun ProfileScreen(
 }
 
 @Composable
-fun UserProfileComp(name: String?, profilePicture: String?,workouts:String,exercises:String,sets:String) {
+fun UserProfileComp(
+    name: String?,
+    profilePicture: String?,
+    workouts: String,
+    exercises: String,
+    sets: String
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -233,9 +239,24 @@ fun WorkoutComponent(workout: Workout) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TopRowComponent(heading = "duration", value = workout.duration, color = Color.Gray)
-            TopRowComponent(heading = "exercises", value = workout.exercises, color = Color.Gray)
-            TopRowComponent(heading = "sets", value = workout.sets, color = Color.Gray)
+            TopRowComponent(
+                heading = "duration",
+                value = workout.duration,
+                color = Color.Gray,
+                valueColor = Color.LightGray
+            )
+            TopRowComponent(
+                heading = "exercises",
+                value = workout.exercises,
+                color = Color.Gray,
+                valueColor = Color.LightGray
+            )
+            TopRowComponent(
+                heading = "sets",
+                value = workout.sets,
+                color = Color.Gray,
+                valueColor = Color.LightGray
+            )
         }
         Divider(thickness = 2.dp)
     }
