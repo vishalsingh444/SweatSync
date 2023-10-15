@@ -83,7 +83,10 @@ fun ExerciseListComponent(
             contentDescription = null,
             modifier = Modifier
                 .height(60.dp)
-                .clip(CircleShape)
+                .clip(CircleShape),
+            onError = {
+                viewModel.fetchData()
+            }
 
         )
         Column(

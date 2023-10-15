@@ -160,7 +160,10 @@ fun ExerciseSetComponent(
                 contentDescription = null,
                 modifier = Modifier
                     .height(40.dp)
-                    .clip(CircleShape)
+                    .clip(CircleShape),
+                onError = {
+                    viewModel.fetchData()
+                }
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(

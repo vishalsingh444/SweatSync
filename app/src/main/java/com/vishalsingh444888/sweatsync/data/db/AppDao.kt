@@ -16,4 +16,7 @@ interface AppDao {
 
     @Query("SELECT * FROM appDatabase WHERE ID = :id")
     suspend fun getExerciseById(id : String): ExercisesItem
+
+    @Query("DELETE FROM appDatabase")
+    suspend fun deleteData()
 }

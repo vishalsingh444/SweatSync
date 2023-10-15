@@ -165,6 +165,7 @@ class AppViewModel @Inject constructor(
     }
     fun fetchData(){
         viewModelScope.launch {
+            repository.deleteData()
             storeDataInDatabase()
         }
     }
@@ -323,7 +324,7 @@ class AppViewModel @Inject constructor(
                     val workout = Workout(routineName,duration,exercises,sets,date)
                     workouts.add(workout)
                 }
-                _workoutList.value = workouts
+                _workoutList.value = workouts.reversed()
                 _totalWorkouts.value = _workoutList.value.size.toString()
                 _totalExercises.value = t_exercise.toString()
                 _totalSets.value = t_sets.toString()

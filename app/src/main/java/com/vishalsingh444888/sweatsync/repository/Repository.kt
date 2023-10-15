@@ -13,6 +13,8 @@ interface Repository {
     suspend fun getAllExerciseFromDb(): List<ExercisesItem>
 
     suspend fun getExerciseById(id: String): ExercisesItem
+
+    suspend fun deleteData()
 }
 
 class NetworkRepository(
@@ -21,6 +23,10 @@ class NetworkRepository(
 ):Repository{
     override suspend fun getAllExercise(): Exercises {
         return api.getAllExercises()
+    }
+
+    override suspend fun deleteData() {
+        dao.deleteData()
     }
 
     override suspend fun getExerciseById(id: String): ExercisesItem {
