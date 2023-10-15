@@ -59,7 +59,8 @@ import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
 fun ExerciseListComponent(
     viewModel: AppViewModel,
     exercise: ExercisesItem,
-    navController: NavController
+    navController: NavController,
+    isCheckRequired: Boolean = true
 ) {
     val exerciseIds by viewModel.exerciseIds.collectAsState()
     var iconState by remember { mutableStateOf(exerciseIds.contains(exercise.id)) }
@@ -105,28 +106,30 @@ fun ExerciseListComponent(
                 color = Color.Gray
             )
         }
-        IconButton(onClick = {
-            iconState = !iconState
-            if (iconState) {
-                viewModel.addExerciseIdToList(exercise.id)
+        if(isCheckRequired){
+            IconButton(onClick = {
+                iconState = !iconState
+                if (iconState) {
+                    viewModel.addExerciseIdToList(exercise.id)
 
-            } else {
-                viewModel.removeExerciseIdFromList(exercise.id)
-            }
-
-        }) {
-            Icon(
-                painter = if (exerciseIds.contains(exercise.id)) {
-                    painterResource(id = R.drawable.close_48px)
                 } else {
-                    painterResource(id = R.drawable.add_48px)
-                }, contentDescription = if (iconState) "Remove Exercise" else "add Exercise",
-                tint = if (exerciseIds.contains(exercise.id)) {
-                    Color.Red
-                } else {
-                    MaterialTheme.colorScheme.primary
+                    viewModel.removeExerciseIdFromList(exercise.id)
                 }
-            )
+
+            }) {
+                Icon(
+                    painter = if (exerciseIds.contains(exercise.id)) {
+                        painterResource(id = R.drawable.close_48px)
+                    } else {
+                        painterResource(id = R.drawable.add_48px)
+                    }, contentDescription = if (iconState) "Remove Exercise" else "add Exercise",
+                    tint = if (exerciseIds.contains(exercise.id)) {
+                        Color.Red
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    }
+                )
+            }
         }
     }
 

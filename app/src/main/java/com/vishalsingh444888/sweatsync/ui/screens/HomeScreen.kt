@@ -105,7 +105,7 @@ fun HomeScreen(viewModel: AppViewModel, navController: NavController) {
                 }
                 Spacer(Modifier.width(16.dp))
                 Button(
-                    onClick = {},
+                    onClick = {navController.navigate("Workout")},
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .weight(1f)

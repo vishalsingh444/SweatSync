@@ -78,6 +78,8 @@ class AppViewModel @Inject constructor(
     private val _totalSets = MutableStateFlow("")
     val totalSets = _totalSets.asStateFlow()
 
+    private val _exploreRoutineList = MutableStateFlow(mutableListOf<ExercisesItem>())
+    val exploreRoutineList = _exploreRoutineList.asStateFlow()
     //timer variables
     @RequiresApi(Build.VERSION_CODES.O)
     private var time: Duration = Duration.ZERO
@@ -102,6 +104,22 @@ class AppViewModel @Inject constructor(
             storeDataInDatabase()
         }
         _routineExercises.value.clear()
+
+    }
+
+    fun updateExploreRoutines(routine: RoutineData){
+        val exercises = mutableListOf<ExercisesItem>()
+        viewModelScope.launch {
+            routine.routine.forEach {
+                val exercise = repository.getExerciseById(it.id)
+                exercises.add(exercise)
+            }
+            if(exercises.isNotEmpty()){
+                _exploreRoutineList.value = exercises
+            }
+        }
+
+
 
     }
 
@@ -242,23 +260,26 @@ class AppViewModel @Inject constructor(
         _firebaseRoutine.value = routines
         Log.d("firebase","routines add to firebaseRoutine = ${_firebaseRoutine.value.size}")
     }
-    fun addRoutineToFireStore(routineName: String){
-        val routineData = RoutineData(routineName = routineName,routine.value)
-        viewModelScope.launch {
-            try {
-                val uid = firebaseAuth.currentUser?.uid
-                val routineDocument = firestore.collection("users").document(uid?: "").collection("routines").document()
-                routineDocument.set(routineData)
-                    .addOnSuccessListener {
-                        Log.d("firestore", "Routine data added to Firestore.")
-                    }
-                    .addOnFailureListener { e ->
-                        Log.d("firestore", "Error adding routine data to Firestore: $e")
-                    }
-            }catch (e:Exception){
-                Log.e("firebase","$e")
-            }
+    fun addRoutineToFireStore(routineName: String,routineList: List<ExerciseWithSet> = routine.value){
+        val routineData = RoutineData(routineName = routineName,routineList)
+        val isDuplicate = checkForDuplicateRoutine(routineName)
+        if(!isDuplicate){
+            viewModelScope.launch {
+                try {
+                    val uid = firebaseAuth.currentUser?.uid
+                    val routineDocument = firestore.collection("users").document(uid?: "").collection("routines").document()
+                    routineDocument.set(routineData)
+                        .addOnSuccessListener {
+                            Log.d("firestore", "Routine data added to Firestore.")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.d("firestore", "Error adding routine data to Firestore: $e")
+                        }
+                }catch (e:Exception){
+                    Log.e("firebase","$e")
+                }
 
+            }
         }
         updateUserRoutineFromFireStore()
     }

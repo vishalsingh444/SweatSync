@@ -113,7 +113,7 @@ fun StartRoutineScreen(viewModel: AppViewModel, navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 items(exercises) {
-                    ExerciseSetComponent(exercise = it, routine = routine.routine, viewModel)
+                    ExerciseSetComponent(exercise = it, routine = routine.routine, viewModel,navController)
                 }
             }
 
@@ -141,13 +141,14 @@ fun TopRowComponent(
 
 @Composable
 fun ExerciseSetComponent(
-    exercise: ExercisesItem, routine: List<ExerciseWithSet>, viewModel: AppViewModel
+    exercise: ExercisesItem, routine: List<ExerciseWithSet>, viewModel: AppViewModel,navController: NavController
 ) {
     var isChecked by remember {
         mutableStateOf(viewModel.getCheckboxState(exercise.id))
     }
     val currentExercise = routine.find { it.id == exercise.id }
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth().clickable { viewModel.updateCurrentExercise(exercise)
+        navController.navigate("Details") }) {
         Divider(thickness = 1.dp)
         Spacer(Modifier.height(8.dp))
         Row(

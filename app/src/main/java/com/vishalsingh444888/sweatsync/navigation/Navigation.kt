@@ -24,6 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.vishalsingh444888.sweatsync.ui.auth.LoginScreen
 import com.vishalsingh444888.sweatsync.ui.auth.RegisterScreen
+import com.vishalsingh444888.sweatsync.ui.screens.DetailedExploreRoutineScreen
 import com.vishalsingh444888.sweatsync.ui.screens.ExerciseDetailsScreen
 import com.vishalsingh444888.sweatsync.ui.screens.ExercisesScreen
 import com.vishalsingh444888.sweatsync.ui.screens.HomeScreen
@@ -57,7 +58,7 @@ fun Navigation(viewModel: AppViewModel, uiState: UiState, navController: NavHost
             )
         }
         composable(route = "Workout") {
-            WorkoutScreen()
+            WorkoutScreen(navController, viewModel = viewModel)
         }
         composable(route = "Profile") {
             ProfileScreen(viewModel, navController)
@@ -71,6 +72,9 @@ fun Navigation(viewModel: AppViewModel, uiState: UiState, navController: NavHost
                 Log.d("appviewmodel","navigated to startroutinescreen")
             }
 
+        }
+        composable(route = "DetailedExploreRoutine"){
+            DetailedExploreRoutineScreen(navController = navController, viewModel = viewModel)
         }
     }
 }

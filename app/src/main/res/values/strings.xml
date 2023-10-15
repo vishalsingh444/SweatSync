@@ -10,4 +10,5 @@
     <string name="google_signIn">SignIn with google</string>
     <string name="web_client_id">746901749565-54sm7nb2a7brjll5geg6jaaodpmkqvp2.apps.googleusercontent.com</string>\
     <string name="new_routine_message">Get started by adding an exercise to your routine</string>
+    <string name="explore_routines_message">Looking for some inspiration for you workouts? Check out these routines</string>
 </resources>
