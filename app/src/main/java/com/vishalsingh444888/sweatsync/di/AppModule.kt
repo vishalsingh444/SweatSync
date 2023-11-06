@@ -47,7 +47,7 @@ object AppModule {
     fun provideExerciseApiService():ExerciseApi{
         val headerInterceptor = Interceptor{chain ->
             val request = chain.request().newBuilder()
-                .addHeader("X-RapidAPI-Key", "xxxx")
+                .addHeader("X-RapidAPI-Key", "ea6a004f6emshb09b5cb564a7ff0p11e7d9jsnf7a0bd605f2d")
                 .addHeader("X-RapidAPI-Host", "exercisedb.p.rapidapi.com")
                 .build()
             chain.proceed(request)

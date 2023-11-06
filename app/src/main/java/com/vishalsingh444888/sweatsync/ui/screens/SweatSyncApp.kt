@@ -18,36 +18,44 @@ import com.vishalsingh444888.sweatsync.navigation.AuthNavigation
 import com.vishalsingh444888.sweatsync.navigation.BottomNavigationBar
 import com.vishalsingh444888.sweatsync.navigation.Navigation
 import com.vishalsingh444888.sweatsync.ui.auth.AuthViewModel
+import com.vishalsingh444888.sweatsync.ui.screens.startRoutine.StartRoutineViewModel
 import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SweatSyncApp(viewModel: AppViewModel = hiltViewModel(), authViewModel: AuthViewModel = hiltViewModel()) {
+fun SweatSyncApp() {
+    val viewModel = hiltViewModel<AppViewModel>()
+    val authViewModel = hiltViewModel<AuthViewModel>()
+    val startRoutineViewModel = hiltViewModel<StartRoutineViewModel>()
     val uiState by viewModel.uiState.collectAsState()
     val navController = rememberNavController()
     val authenticated by authViewModel.authenticated.collectAsState()
     var showBottomBar by rememberSaveable { mutableStateOf(true) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    showBottomBar = when(navBackStackEntry?.destination?.route){
+    showBottomBar = when (navBackStackEntry?.destination?.route) {
         "CreateNewRoutine" -> false
         "ExerciseList" -> false
         "Details" -> false
         "StartRoutine" -> false
         else -> true
     }
-    if(authenticated){
-        Scaffold (
+    if (authenticated) {
+        Scaffold(
             bottomBar = {
-                if(showBottomBar) BottomNavigationBar(navController = navController)
+                if (showBottomBar) BottomNavigationBar(navController = navController)
             }
-        ){
-            Navigation(viewModel = viewModel, uiState = uiState,navController = navController)
+        ) {
+            Navigation(
+                viewModel = viewModel,
+                uiState = uiState,
+                navController = navController,
+                startRoutineViewModel = startRoutineViewModel
+            )
         }
-    }
-    else{
+    } else {
         AuthNavigation()
     }
 }

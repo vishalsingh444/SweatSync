@@ -16,12 +16,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.vishalsingh444888.sweatsync.ui.auth.LoginScreen
 import com.vishalsingh444888.sweatsync.ui.auth.RegisterScreen
 import com.vishalsingh444888.sweatsync.ui.screens.DetailedExploreRoutineScreen
@@ -30,23 +28,28 @@ import com.vishalsingh444888.sweatsync.ui.screens.ExercisesScreen
 import com.vishalsingh444888.sweatsync.ui.screens.HomeScreen
 import com.vishalsingh444888.sweatsync.ui.screens.NewRoutineScreen
 import com.vishalsingh444888.sweatsync.ui.screens.SweatSyncApp
-import com.vishalsingh444888.sweatsync.ui.screens.ProfileScreen
-import com.vishalsingh444888.sweatsync.ui.screens.StartRoutineScreen
 import com.vishalsingh444888.sweatsync.ui.screens.WorkoutScreen
+import com.vishalsingh444888.sweatsync.ui.screens.profile.ProfileScreen
+import com.vishalsingh444888.sweatsync.ui.screens.startRoutine.StartRoutineScreen
+import com.vishalsingh444888.sweatsync.ui.screens.startRoutine.StartRoutineViewModel
 import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
-import com.vishalsingh444888.sweatsync.ui.viewmodel.RoutineData
 import com.vishalsingh444888.sweatsync.ui.viewmodel.UiState
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun Navigation(viewModel: AppViewModel, uiState: UiState, navController: NavHostController) {
+fun Navigation(
+    viewModel: AppViewModel,
+    uiState: UiState,
+    navController: NavHostController,
+    startRoutineViewModel: StartRoutineViewModel
+) {
 
     NavHost(navController = navController, startDestination = "Home") {
         composable(route = "SignOut") {
             SweatSyncApp()
         }
         composable(route = "Home") {
-            HomeScreen(viewModel, navController)
+            HomeScreen(viewModel, navController,startRoutineViewModel)
         }
         composable(route = "ExerciseList") {
             ExercisesScreen(uiState = uiState, viewModel = viewModel, navController)
@@ -61,19 +64,19 @@ fun Navigation(viewModel: AppViewModel, uiState: UiState, navController: NavHost
             WorkoutScreen(navController, viewModel = viewModel)
         }
         composable(route = "Profile") {
-            ProfileScreen(viewModel, navController)
+            ProfileScreen(navController)
         }
         composable(route = "CreateNewRoutine") {
             NewRoutineScreen(viewModel = viewModel, navController)
         }
-        composable(route = "StartRoutine"){
-            if(viewModel.isStartRoutineListUpdated.value){
-                StartRoutineScreen(viewModel = viewModel,navController)
-                Log.d("appviewmodel","navigated to startroutinescreen")
+        composable(route = "StartRoutine") {
+            if (viewModel.isStartRoutineListUpdated.value) {
+                StartRoutineScreen(viewModel = viewModel, navController = navController, startRoutineViewModel = startRoutineViewModel)
+                Log.d("appviewmodel", "navigated to startroutinescreen")
             }
 
         }
-        composable(route = "DetailedExploreRoutine"){
+        composable(route = "DetailedExploreRoutine") {
             DetailedExploreRoutineScreen(navController = navController, viewModel = viewModel)
         }
     }

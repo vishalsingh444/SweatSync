@@ -40,13 +40,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.vishalsingh444888.sweatsync.R
+import com.vishalsingh444888.sweatsync.ui.screens.startRoutine.StartRoutineViewModel
 import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
 import com.vishalsingh444888.sweatsync.ui.viewmodel.RoutineData
 
 @RequiresApi(Build.VERSION_CODES.S)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: AppViewModel, navController: NavController) {
+fun HomeScreen(viewModel: AppViewModel, navController: NavController,startRoutineViewModel: StartRoutineViewModel) {
     viewModel.updateUserRoutineFromFireStore()
     val routines by viewModel.firebaseRoutine.collectAsState()
     val isStartRoutineListUpdated by viewModel.isStartRoutineListUpdated
@@ -139,7 +140,7 @@ fun HomeScreen(viewModel: AppViewModel, navController: NavController) {
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            RoutinesLazyList(routines = routines,viewModel,navController)
+            RoutinesLazyList(routines = routines,startRoutineViewModel,navController)
         }
     }
 }
@@ -149,8 +150,9 @@ fun HomeScreen(viewModel: AppViewModel, navController: NavController) {
 @Composable
 fun RoutineCardComponent(
     routine: RoutineData,
-    viewModel: AppViewModel,
-    navController: NavController
+    startRoutineViewModel: StartRoutineViewModel,
+    navController: NavController,
+    routines: List<RoutineData>
 ) {
 
     Card(
@@ -176,11 +178,11 @@ fun RoutineCardComponent(
                 color = Color.LightGray
             )
             Button(onClick = {
-                viewModel.resetStartRoutineList()
-                viewModel.updateStartRoutineList(routine.routineName)
-                viewModel.updateStartRoutine(routine)
-                viewModel.clearCheckboxState()
-                viewModel.startTimer()
+                startRoutineViewModel.resetStartRoutineList()
+                startRoutineViewModel.updateStartRoutineList(routine.routineName, _firebaseRoutine = routines)
+                startRoutineViewModel.updateStartRoutine(routine)
+                startRoutineViewModel.clearCheckboxState()
+                startRoutineViewModel.startTimer()
                 navController.navigate("StartRoutine")
             }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
                 Text(text = "Start", fontSize = 16.sp)
@@ -193,7 +195,7 @@ fun RoutineCardComponent(
 @Composable
 fun RoutinesLazyList(
     routines: List<RoutineData>,
-    viewModel: AppViewModel,
+    startRoutineViewModel: StartRoutineViewModel,
     navController: NavController
 ) {
     LazyColumn(
@@ -202,7 +204,7 @@ fun RoutinesLazyList(
             .padding(bottom = 60.dp)
     ) {
         items(routines) { routine ->
-            RoutineCardComponent(routine = routine,viewModel,navController)
+            RoutineCardComponent(routine = routine,startRoutineViewModel,navController,routines)
         }
     }
 }

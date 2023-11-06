@@ -1,4 +1,4 @@
-package com.vishalsingh444888.sweatsync.ui.screens
+package com.vishalsingh444888.sweatsync.ui.screens.profile
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +42,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.vishalsingh444888.sweatsync.ui.auth.AuthViewModel
 import com.vishalsingh444888.sweatsync.ui.auth.restartApp
-import com.vishalsingh444888.sweatsync.ui.viewmodel.AppViewModel
+import com.vishalsingh444888.sweatsync.ui.screens.startRoutine.TopRowComponent
 import com.vishalsingh444888.sweatsync.ui.viewmodel.Workout
 import kotlinx.coroutines.launch
 
@@ -50,22 +50,23 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    appViewModel: AppViewModel,
     navController: NavController,
-    viewModel: AuthViewModel = hiltViewModel()
 ) {
+    val viewModel = hiltViewModel<AuthViewModel>()
+    val profileViewModel = hiltViewModel<ProfileViewModel>()
+
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val profileUiState by appViewModel.profileUiState.collectAsState()
-    val workouts by appViewModel.workoutList.collectAsState()
-    val totalWorkout by appViewModel.totalWorkouts.collectAsState()
-    val totalExercises by appViewModel.totalExercises.collectAsState()
-    val totalSets by appViewModel.totalSets.collectAsState()
+    val profileUiState by profileViewModel.profileUiState.collectAsState()
+    val workouts by profileViewModel.workoutList.collectAsState()
+    val totalWorkout by profileViewModel.totalWorkouts.collectAsState()
+    val totalExercises by profileViewModel.totalExercises.collectAsState()
+    val totalSets by profileViewModel.totalSets.collectAsState()
     if (profileUiState.username == "User001") {
-        appViewModel.updateUserDetails()
+        profileViewModel.updateUserDetails()
     }
     if (workouts.isEmpty()) {
-        appViewModel.getWorkoutListFromFireStore()
+        profileViewModel.getWorkoutListFromFireStore()
     }
     Log.d("firebase", "name: ${profileUiState.username} ${profileUiState.profileUrl}")
     Scaffold(

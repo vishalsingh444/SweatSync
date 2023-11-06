@@ -1,4 +1,4 @@
-package com.vishalsingh444888.sweatsync.ui.screens
+package com.vishalsingh444888.sweatsync.ui.screens.startRoutine
 
 import android.os.Build
 import android.util.Log
@@ -51,21 +51,27 @@ import com.vishalsingh444888.sweatsync.ui.viewmodel.ExerciseWithSet
 @RequiresApi(Build.VERSION_CODES.S)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StartRoutineScreen(viewModel: AppViewModel, navController: NavController) {
-    val exercises by viewModel.startRoutineList.collectAsState()
+fun StartRoutineScreen(
+    viewModel: AppViewModel,
+    navController: NavController,
+    startRoutineViewModel: StartRoutineViewModel
+) {
+    val exercises by startRoutineViewModel.startRoutineList.collectAsState()
     Log.d("appviewmodel", "exercises size in StartRoutineScreen = ${exercises.size}")
-    val routine by viewModel.startRoutine.collectAsState()
+
+    val routine by startRoutineViewModel.startRoutine.collectAsState()
     Log.d("appviewmodel", "routine in StartRoutineScreen is ${routine.routine.size}")
-    val uiState by viewModel.startRoutineState.collectAsState()
-    val isTimerPlaying by remember {
-        mutableStateOf(viewModel.isPlaying)
-    }
+
+    val uiState by startRoutineViewModel.startRoutineState.collectAsState()
+
+
     BackHandler {
-        viewModel.restartTimer()
-        viewModel.pauseTimer()
-        viewModel.resetStartRoutineState()
+        startRoutineViewModel.restartTimer()
+        startRoutineViewModel.pauseTimer()
+        startRoutineViewModel.resetStartRoutineState()
         navController.navigate("Home")
     }
+
     Scaffold(topBar = {
         TopAppBar(title = {
             Text(
@@ -74,12 +80,12 @@ fun StartRoutineScreen(viewModel: AppViewModel, navController: NavController) {
         }, actions = {
             Button(
                 onClick = {
-                    viewModel.updateWorkoutToFireStore(
+                    startRoutineViewModel.updateWorkoutToFireStore(
                         routine.routineName,
                         uiState.duration,
                         uiState.exercises,
                         uiState.sets,
-                        viewModel.formateDate
+                        startRoutineViewModel.formateDate
 
                     )
                     navController.navigate("Home")
@@ -114,7 +120,13 @@ fun StartRoutineScreen(viewModel: AppViewModel, navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 items(exercises) {
-                    ExerciseSetComponent(exercise = it, routine = routine.routine, viewModel,navController)
+                    ExerciseSetComponent(
+                        exercise = it,
+                        routine = routine.routine,
+                        viewModel,
+                        navController,
+                        startRoutineViewModel
+                    )
                 }
             }
 
@@ -128,7 +140,7 @@ fun TopRowComponent(
     value: String,
     fontWeight: FontWeight = FontWeight.Normal,
     color: Color = MaterialTheme.colorScheme.onBackground,
-    valueColor : Color = Color.Gray,
+    valueColor: Color = Color.Gray,
     onClick: () -> Unit = {}
 
 ) {
@@ -143,14 +155,22 @@ fun TopRowComponent(
 
 @Composable
 fun ExerciseSetComponent(
-    exercise: ExercisesItem, routine: List<ExerciseWithSet>, viewModel: AppViewModel,navController: NavController
+    exercise: ExercisesItem,
+    routine: List<ExerciseWithSet>,
+    viewModel: AppViewModel,
+    navController: NavController,
+    startRoutineViewModel: StartRoutineViewModel
 ) {
     var isChecked by remember {
-        mutableStateOf(viewModel.getCheckboxState(exercise.id))
+        mutableStateOf(startRoutineViewModel.getCheckboxState(exercise.id))
     }
     val currentExercise = routine.find { it.id == exercise.id }
-    Column(modifier = Modifier.fillMaxWidth().clickable { viewModel.updateCurrentExercise(exercise)
-        navController.navigate("Details") }) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .clickable {
+            viewModel.updateCurrentExercise(exercise)
+            navController.navigate("Details")
+        }) {
         Divider(thickness = 1.dp)
         Spacer(Modifier.height(8.dp))
         Row(
@@ -214,10 +234,10 @@ fun ExerciseSetComponent(
                 )
                 Checkbox(checked = isChecked, onCheckedChange = {
                     isChecked = it
-                    viewModel.setCheckboxState(exerciseId = exercise.id, it)
-                    viewModel.updateStartRoutineState(
+                    startRoutineViewModel.setCheckboxState(exerciseId = exercise.id, it)
+                    startRoutineViewModel.updateStartRoutineState(
                         exercises = "1",
-                        sets = "${currentExercise.exerciseSet.sets}"
+                        sets = currentExercise.exerciseSet.sets
                     )
                 })
             }
